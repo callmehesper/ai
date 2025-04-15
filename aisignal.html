@@ -2,50 +2,149 @@
 <html>
 <head>
     <title>Hesper's AI Crypto Predictor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: Arial, sans-serif; background: #0f0f0f; color: #fff; text-align: center; padding-top: 50px; }
-        input, button { font-size: 16px; padding: 8px; margin: 10px; border-radius: 8px; border: none; }
-        .toggle { padding: 8px 16px; margin: 10px; border-radius: 8px; background: #1a1a1a; color: white; cursor: pointer; }
-        .active { background: #00b894; }
-        #result { font-size: 1.5em; margin-top: 30px; }
-        #priceBox { margin-top: 20px; font-size: 1em; }
-        .suggestions { background: #1f1f1f; border-radius: 10px; max-width: 200px; margin: auto; position: absolute; left: 50%; transform: translateX(-50%); z-index: 999; }
-        .suggestions div { padding: 8px; border-bottom: 1px solid #333; cursor: pointer; }
-        .suggestions div:hover { background: #333; }
-        #chartContainer { width: 90%; height: 500px; margin: 30px auto 0 auto; background-color: #1c1c1c; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            text-align: center;
+            padding-top: 50px;
+            margin: 0;
+        }
+        input, button {
+            font-size: 16px;
+            padding: 8px;
+            margin: 10px;
+            border-radius: 8px;
+            border: none;
+            box-sizing: border-box;
+        }
+        .toggle {
+            padding: 8px 16px;
+            margin: 10px;
+            border-radius: 8px;
+            background: #1a1a1a;
+            color: white;
+            cursor: pointer;
+        }
+        .active {
+            background: #00b894;
+        }
+        #result {
+            font-size: 1.2em;
+            margin-top: 30px;
+            word-wrap: break-word;
+        }
+        #priceBox {
+            margin-top: 20px;
+            font-size: 1em;
+            word-wrap: break-word;
+        }
+        .suggestions {
+            background: #1f1f1f;
+            border-radius: 10px;
+            max-width: 95%;
+            margin: 10px auto;
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .suggestions div {
+            padding: 8px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+            word-wrap: break-word;
+        }
+        .suggestions div:hover {
+            background: #333;
+        }
+        #chartContainer {
+            width: 95%;
+            height: 500px;
+            margin: 30px auto 0 auto;
+            background-color: #1c1c1c;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
         .market-price { color: #00ffff; }
         .entry-price { color: #ffff00; }
         .take-profit { color: #00ff00; }
         .stop-loss { color: #ff0000; }
         #copyright {
             margin-top: 20px;
-            font-size: 0.9em;
+            font-size: 0.8em;
             color: #777;
+            word-wrap: break-word;
+        }
+        @media (min-width: 768px) {
+            #result {
+                font-size: 1.5em;
+            }
+            #priceBox {
+                font-size: 1.1em;
+            }
+            .suggestions {
+                max-width: 400px;
+            }
+            input, button {
+                font-size: 18px;
+                padding: 10px 16px;
+            }
+            .toggle {
+                padding: 10px 20px;
+            }
+            #copyright {
+                font-size: 0.9em;
+            }
+        }
+        @media (max-width: 480px) {
+            input, button {
+                font-size: 14px;
+                padding: 6px 12px;
+            }
+            .toggle {
+                padding: 6px 14px;
+            }
+            #chartContainer {
+                height: 300px;
+            }
+            #result {
+                font-size: 1em;
+            }
+            #priceBox{
+                font-size: 0.9em;
+            }
+            #copyright {
+                font-size: 0.7em;
+            }
         }
     </style>
 </head>
 <body>
     <h1>🔮Hesper's AI Crypto Market Predictor</h1>
-
     <label for="coin">Search Coin (e.g., BTCUSDT):</label><br>
     <input type="text" id="coin" oninput="showSuggestions()" autocomplete="off" placeholder="Start typing...">
     <div id="suggestions" class="suggestions"></div>
-
     <div>
         <button class="toggle active" onclick="setMode('spot')" id="spotBtn">Spot</button>
         <button class="toggle" onclick="setMode('futures')" id="futuresBtn">Futures</button>
     </div>
-
     <div id="result">📡 Waiting for data...</div>
     <div id="priceBox"></div>
     <div id="chartContainer">
         <iframe id="tvChart" style="width: 100%; height: 100%; border: none;"></iframe>
     </div>
-
     <div id="copyright">
-        &copy; 2025 Hesper ★ All rights reserved. 
+        &copy; 2024 Hesper. All rights reserved. ★
     </div>
-
     <script>
         let mode = 'spot';
         let allCoins = [];
@@ -76,7 +175,6 @@
             const suggestionBox = document.getElementById('suggestions');
             suggestionBox.innerHTML = '';
             if (!input || input.length < 1) return;
-
             const matches = allCoins.filter(c => c.includes(input)).slice(0, 10);
             matches.forEach(coin => {
                 const div = document.createElement('div');
@@ -95,7 +193,6 @@
             document.getElementById('tvChart').src = tvWidgetUrl;
         }
 
-        // Helper function to calculate Simple Moving Average
         function calculateSMA(data, period) {
             if (data.length < period) return null;
             const slice = data.slice(-period).map(Number);
@@ -103,7 +200,6 @@
             return sum / period;
         }
 
-        // Helper function to calculate Relative Strength Index (RSI)
         function calculateRSI(prices, period = 14) {
             if (prices.length < period + 1) return null;
             const gains = [];
@@ -120,14 +216,12 @@
             return 100 - (100 / (1 + rs));
         }
 
-        // Helper function to calculate MACD
         function calculateMACD(prices, shortPeriod = 12, longPeriod = 26, signalPeriod = 9) {
             if (prices.length < longPeriod + signalPeriod - 1) return null;
             const smaShort = calculateSMA(prices, shortPeriod);
             const smaLong = calculateSMA(prices, longPeriod);
             if (smaShort === null || smaLong === null) return null;
             const macdLine = smaShort - smaLong;
-
             const macdHistory = [];
             for (let i = longPeriod - 1; i < prices.length; i++) {
                 const shortAvg = calculateSMA(prices.slice(0, i + 1), shortPeriod);
@@ -138,11 +232,9 @@
             }
             if (macdHistory.length < signalPeriod) return null;
             const signalLine = calculateSMA(macdHistory, signalPeriod);
-
             return { macd: macdLine, signal: signalLine };
         }
 
-        // Helper function to calculate Bollinger Bands
         function calculateBollingerBands(prices, period = 20, stdDev = 2) {
             if (prices.length < period) return null;
             const sma = calculateSMA(prices, period);
@@ -159,7 +251,6 @@
             document.getElementById('result').innerText = `⏳ Analyzing ${symbol} with trend analysis...`;
             document.getElementById('priceBox').innerText = "";
             loadChart(symbol);
-
             try {
                 const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=200`;
                 const res = await fetch(url);
@@ -167,19 +258,16 @@
                 const data = await res.json();
                 const prices = data.map(kline => parseFloat(kline[4]));
                 const lastPrice = prices[prices.length - 1];
-
                 const smaShort = calculateSMA(prices, 10);
                 const smaLong = calculateSMA(prices, 20);
                 const rsi = calculateRSI(prices, 10);
                 const macd = calculateMACD(prices, 12, 26, 9);
                 const bollinger = calculateBollingerBands(prices, 20, 1.5);
-                const sma200 = calculateSMA(prices, 200);  // Calculate 200-period SMA for trend
-
+                const sma200 = calculateSMA(prices, 200);
                 let prediction = "Neutral", action = "", target = "", stopLoss = "", entryPrice = "";
                 const volatilityFactor = (bollinger && bollinger.upper && bollinger.lower) ? (bollinger.upper - bollinger.lower) / bollinger.middle : 0.03;
                 const isBullish = sma200 !== null && lastPrice > sma200;
                 const isBearish = sma200 !== null && lastPrice < sma200;
-
                 if (smaShort && smaLong && rsi && macd && bollinger && sma200 !== null) {
                     if (mode === 'spot') {
                         if (isBullish) {
@@ -229,25 +317,19 @@
                         }
                     }
                 }
-
                 document.getElementById('result').innerText = `📊 Signal: ${prediction}`;
                 document.getElementById('priceBox').innerHTML = `<span class="market-price">Current Price: $${lastPrice.toFixed(4)}</span><br>${action}`;
-
-        } catch (e) {
+            } catch (e) {
                 document.getElementById('result').innerText = "❌ Error fetching or analyzing data";
                 document.getElementById('priceBox').innerText = "";
                 console.error(e);
-        }
+            }
         }
 
         window.onload = loadCoinList;
-
-        // Function to disable text selection - does not work fully.
         document.onselectstart = function() {
             return false;
         };
-
-        // Function to disable context menu - does not work fully.
         document.oncontextmenu = function() {
             return false;
         };
